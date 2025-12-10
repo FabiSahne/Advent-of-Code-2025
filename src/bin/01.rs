@@ -40,13 +40,9 @@ fn part1<R: BufRead>(reader: R) -> Result<usize> {
             _ => panic!("must be L or R"),
         }
 
-        while position < 0 {
-            position += 100;
-        }
-
         position %= 100;
 
-        if position == 0 || position == 100 {
+        if position == 0 {
             zeros += 1;
         }
     }
@@ -57,39 +53,33 @@ fn part1<R: BufRead>(reader: R) -> Result<usize> {
 fn part2<R: BufRead>(reader: R) -> Result<usize> {
     let mut position = 50;
     let mut zeros = 0;
+    let mut reflected = false;
 
     for line in reader.lines() {
         let line = line?;
         let (dir, amount) = line.split_at(1);
-        let amount = amount.parse::<i32>()?;
+        let amount = amount.parse::<usize>()?;
 
-        // stoopid
         match dir {
             "L" => {
-                for _ in 0..amount {
-                    position = match position {
-                        0 => 99,
-                        1 => {
-                            zeros += 1;
-                            0
-                        }
-                        p => p - 1,
-                    }
+                if !reflected {
+                    position = (100 - position) % 100;
+                    reflected = true;
                 }
+                position += amount;
             }
             "R" => {
-                for _ in 0..amount {
-                    position = match position {
-                        99 => {
-                            zeros += 1;
-                            0
-                        }
-                        p => p + 1,
-                    }
+                if reflected {
+                    position = (100 - position) % 100;
+                    reflected = false;
                 }
+                position += amount
             }
             _ => panic!("must be L or R"),
         }
+
+        zeros += position / 100;
+        position %= 100;
     }
 
     Ok(zeros)
