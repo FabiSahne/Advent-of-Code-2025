@@ -42,6 +42,11 @@ impl Range {
     }
 
     #[inline]
+    fn size(&self) -> usize {
+        self.1 - self.0 + 1
+    }
+
+    #[inline]
     fn contains(&self, val: usize) -> bool {
         val >= self.begin() && val <= self.end()
     }
@@ -98,7 +103,7 @@ fn part2(reader: &mut dyn BufRead) -> Result<usize> {
 
     Ok(ranges
         .into_iter()
-        .fold(0, |total, range| total + (range.1 - range.0) + 1))
+        .fold(0, |total, range| total + range.size()))
 }
 
 fn main() -> Result<()> {

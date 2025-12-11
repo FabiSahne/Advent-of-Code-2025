@@ -6,6 +6,7 @@ use std::{
 use advent_of_code_2025::time;
 use anyhow::Result;
 use const_format::concatcp;
+use rayon::prelude::*;
 
 const DAY: &str = "02";
 const INPUT_FILE: &str = concatcp!("input/", DAY, ".txt");
@@ -22,26 +23,30 @@ const TEST_SOLUTION_PART2: usize = 4_174_379_265;
 fn part1<R: BufRead>(mut reader: R) -> Result<usize> {
     let mut line = String::new();
     reader.read_to_string(&mut line)?;
-    line = line.trim().to_string();
 
-    let mut result = 0;
+    let ranges = line.trim().split(',').collect::<Vec<_>>();
 
-    for range in line.split(',') {
-        let (from, to) = range.split_once('-').expect("range has '-'");
-        let range = from.parse::<usize>()?..=to.parse::<usize>()?;
+    let result = ranges
+        .into_par_iter()
+        .map(|range| {
+            let mut result = 0;
+            let (from, to) = range.split_once('-').expect("range has '-'");
+            let range = from.parse::<usize>().unwrap()..=to.parse::<usize>().unwrap();
 
-        for i in range {
-            let mag = i.ilog10() + 1;
+            for i in range {
+                let mag = i.ilog10() + 1;
 
-            if mag % 2 == 0 {
-                let mut cmp = i % 10usize.pow(mag / 2);
-                cmp = cmp * 10usize.pow(mag / 2) + cmp;
-                if cmp == i {
-                    result += i;
+                if mag % 2 == 0 {
+                    let mut cmp = i % 10usize.pow(mag / 2);
+                    cmp = cmp * 10usize.pow(mag / 2) + cmp;
+                    if cmp == i {
+                        result += i;
+                    }
                 }
             }
-        }
-    }
+            result
+        })
+        .sum();
 
     Ok(result)
 }
@@ -49,47 +54,49 @@ fn part1<R: BufRead>(mut reader: R) -> Result<usize> {
 fn part2<R: BufRead>(mut reader: R) -> Result<usize> {
     let mut line = String::new();
     reader.read_to_string(&mut line)?;
-    line = line.trim().to_string();
 
-    let mut result = 0;
+    let ranges = line.trim().split(',').collect::<Vec<_>>();
 
-    for range in line.split(',') {
-        let (from, to) = range.split_once('-').expect("range has '-'");
-        let range = from.parse::<usize>()?..=to.parse::<usize>()?;
+    let result = ranges
+        .into_par_iter()
+        .map(|range| {
+            let (from, to) = range.split_once('-').expect("range has '-'");
+            let range = from.parse::<usize>().unwrap()..=to.parse::<usize>().unwrap();
+            let mut result = 0;
+            for i in range {
+                let mag = i.ilog10() + 1;
+                let mut is_invalid = false;
 
-        for i in range {
-            // let i_str = i.to_string();
-            let mag = i.ilog10() + 1;
-            let mut is_invalid = false;
+                for l in 1..=(mag / 2) {
+                    if mag % l != 0 {
+                        continue;
+                    }
 
-            for l in 1..=(mag / 2) {
-                if mag % l != 0 {
-                    continue;
+                    let ten_to_l = 10usize.pow(l);
+
+                    let prefix = i % ten_to_l;
+                    if prefix == 0 {
+                        continue;
+                    }
+
+                    let mut compare = prefix;
+                    while compare < i {
+                        compare = compare * ten_to_l + prefix;
+                    }
+
+                    if compare == i {
+                        is_invalid = true;
+                        break;
+                    }
                 }
 
-                let ten_to_l = 10usize.pow(l);
-
-                let prefix = i % ten_to_l;
-                if prefix == 0 {
-                    continue;
-                }
-
-                let mut compare = prefix;
-                while compare < i {
-                    compare = compare * ten_to_l + prefix;
-                }
-
-                if compare == i {
-                    is_invalid = true;
-                    break;
+                if is_invalid {
+                    result += i;
                 }
             }
-
-            if is_invalid {
-                result += i;
-            }
-        }
-    }
+            result
+        })
+        .sum();
 
     Ok(result)
 }
