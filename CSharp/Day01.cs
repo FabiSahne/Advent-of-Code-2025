@@ -63,34 +63,34 @@ public static class Day01
 
             switch (dir)
             {
-                case 'L':
-                    for (var i = 0; i < amount; i += 1)
+            case 'L':
+                for (var i = 0; i < amount; i += 1)
+                {
+                    position = position switch
                     {
-                        position = position switch
-                        {
-                            0 => 99,
-                            > 0 => position - 1,
-                            _ => position
-                        };
-                        if (position == 0)
-                            zeros += 1;
-                    }
+                        0 => 99,
+                        > 0 => position - 1,
+                        _ => position
+                    };
+                    if (position == 0)
+                        zeros += 1;
+                }
 
-                    break;
-                case 'R':
-                    for (var i = 0; i < amount; i++)
+                break;
+            case 'R':
+                for (var i = 0; i < amount; i++)
+                {
+                    position = position switch
                     {
-                        position = position switch
-                        {
-                            99 => 0,
-                            < 99 => position + 1,
-                            _ => position
-                        };
-                        if (position == 0)
-                            zeros += 1;
-                    }
+                        99 => 0,
+                        < 99 => position + 1,
+                        _ => position
+                    };
+                    if (position == 0)
+                        zeros += 1;
+                }
 
-                    break;
+                break;
             }
         }
 
